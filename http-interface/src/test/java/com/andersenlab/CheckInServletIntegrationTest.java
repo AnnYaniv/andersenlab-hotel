@@ -2,19 +2,18 @@ package com.andersenlab;
 
 import com.andersenlab.hotel.HotelModule;
 import com.andersenlab.hotel.common.reader.PropertyReaderFromFile;
+import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.http.ServletStarter;
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentEntity;
 import com.andersenlab.hotel.model.ApartmentStatus;
 import com.andersenlab.hotel.model.Client;
 import com.andersenlab.hotel.model.ClientStatus;
-import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.andersenlab.hotel.service.impl.ClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CheckInServletIntegrationTest {
@@ -112,7 +112,7 @@ class CheckInServletIntegrationTest {
         final UUID newClientId = new Client(UUID.fromString("00000000-0000-0000-0000-000000000002"),
                 "John", ClientStatus.NEW, new HashSet<>(Set.of(apartmentEntity))).getId();
         final UUID apartmentId = apartment.getId();
-        String jsonBody = objectMapper.writeValueAsString(new ClientAppartmentIds(newClientId, apartmentId));
+        String jsonBody = objectMapper.writeValueAsString(new ClientApartmentIds(newClientId, apartmentId));
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -123,13 +123,14 @@ class CheckInServletIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_BAD_REQUEST);
     }
+
     @SneakyThrows
     @Test
     void checkIn_NotExistingApartments_ShouldReturnSC_BAD_REQUEST() {
         final UUID clientId = client.getId();
         final UUID newApartmentId = new Apartment(UUID.fromString("00000000-0000-0000-0000-000000000002"),
                 new BigDecimal(1), BigInteger.ONE, true, ApartmentStatus.AVAILABLE).getId();
-        String jsonBody = objectMapper.writeValueAsString(new ClientAppartmentIds(clientId, newApartmentId));
+        String jsonBody = objectMapper.writeValueAsString(new ClientApartmentIds(clientId, newApartmentId));
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -146,7 +147,7 @@ class CheckInServletIntegrationTest {
     void checkIn_ValidClient_ShouldReturnStatusOK() {
         final UUID clientId = client.getId();
         final UUID apartmentId = apartment.getId();
-        String jsonBody = objectMapper.writeValueAsString(new ClientAppartmentIds(clientId, apartmentId));
+        String jsonBody = objectMapper.writeValueAsString(new ClientApartmentIds(clientId, apartmentId));
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -163,7 +164,7 @@ class CheckInServletIntegrationTest {
     void checkIn_ValidApartments_ShouldReturnStatusOK() {
         final UUID clientId = client.getId();
         final UUID apartmentId = apartment.getId();
-        String jsonBody = objectMapper.writeValueAsString(new ClientAppartmentIds(clientId, apartmentId));
+        String jsonBody = objectMapper.writeValueAsString(new ClientApartmentIds(clientId, apartmentId));
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -175,9 +176,6 @@ class CheckInServletIntegrationTest {
         assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_OK);
     }
 
-    @Data
-    class ClientAppartmentIds {
-        private final UUID clientId;
-        private final UUID apartmentId;
+    record ClientApartmentIds(UUID clientId, UUID apartmentId) {
     }
 }

@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.SneakyThrows;
 import org.flywaydb.core.Flyway;
 
-import java.sql.Connection;
+import javax.sql.DataSource;
 
 public class JdbcConnector {
 
@@ -21,8 +21,8 @@ public class JdbcConnector {
     }
 
     @SneakyThrows
-    public Connection getConnection() {
-        return dataSource.getConnection();
+    public DataSource getDatasourse() {
+        return dataSource;
     }
 
     public JdbcConnector migrate() {

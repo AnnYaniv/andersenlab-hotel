@@ -28,7 +28,7 @@ class JdbcClientRepositoryTest {
         JdbcConnector connector = new JdbcConnector("jdbc:h2:~/ht2-" + integer.incrementAndGet(), "sa", "")
                 .migrate();
 
-        target = new JdbcClientRepository(connector);
+        target = new JdbcClientRepository(connector.getDatasourse());
 
         client1 = new Client(UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "a", ClientStatus.NEW);

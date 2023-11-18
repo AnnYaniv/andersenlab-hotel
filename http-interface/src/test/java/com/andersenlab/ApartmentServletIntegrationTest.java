@@ -2,11 +2,11 @@ package com.andersenlab;
 
 import com.andersenlab.hotel.HotelModule;
 import com.andersenlab.hotel.common.reader.PropertyReaderFromFile;
+import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.http.ServletStarter;
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentEntity;
 import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
-import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;

@@ -1,8 +1,6 @@
-package com.andersenlab.hotel.common.service;
+package com.andersenlab.hotel.service;
 
 import com.andersenlab.hotel.HotelModule;
-import com.andersenlab.hotel.common.repository.ThreadSafeApartmentRepository;
-import com.andersenlab.hotel.common.repository.ThreadSafeClientRepository;
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentSort;
 import com.andersenlab.hotel.model.Client;
@@ -12,9 +10,6 @@ import com.andersenlab.hotel.repository.infile.InFileApartmentRepository;
 import com.andersenlab.hotel.repository.infile.InFileClientRepository;
 import com.andersenlab.hotel.repository.inmemory.InMemoryApartmentRepository;
 import com.andersenlab.hotel.repository.inmemory.InMemoryClientRepository;
-import com.andersenlab.hotel.repository.jdbc.JdbcApartmentRepository;
-import com.andersenlab.hotel.repository.jdbc.JdbcClientRepository;
-import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.andersenlab.hotel.service.impl.ClientService;
 import com.andersenlab.hotel.usecase.CheckInClientUseCase;
@@ -58,18 +53,6 @@ public class ContextBuilder {
             }
         }
         return this.initInFileRepositories(file);
-    }
-
-    public ContextBuilder initJdbc(JdbcConnector connector) {
-        this.clientRepository = new JdbcClientRepository(connector.getDatasourse());
-        this.apartmentRepository = new JdbcApartmentRepository(connector.getDatasourse());
-        return this;
-    }
-
-    public ContextBuilder doRepositoryThreadSafe() {
-        this.apartmentRepository = new ThreadSafeApartmentRepository(this.apartmentRepository);
-        this.clientRepository = new ThreadSafeClientRepository(this.clientRepository);
-        return this;
     }
 
     private ContextBuilder initInFileRepositories(final File file) {

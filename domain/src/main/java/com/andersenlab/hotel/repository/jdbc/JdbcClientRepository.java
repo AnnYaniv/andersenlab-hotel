@@ -7,8 +7,9 @@ import com.andersenlab.hotel.model.ClientSort;
 import com.andersenlab.hotel.model.ClientStatus;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
 import lombok.SneakyThrows;
-import org.h2.api.H2Type;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -24,10 +25,10 @@ import java.util.UUID;
 
 public final class JdbcClientRepository implements SortableCrudRepository<Client, ClientSort> {
 
-    private final JdbcConnector config;
+    private final DataSource source;
 
-    public JdbcClientRepository(JdbcConnector config) {
-        this.config = config;
+    public JdbcClientRepository(DataSource source) {
+        this.source = source;
     }
 
     @Override
@@ -37,14 +38,14 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 VALUES (?, ?, ?)
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, entity.getId(), H2Type.UUID);
-            statement.setObject(2, entity.getName(), H2Type.VARCHAR);
-            statement.setObject(3, entity.getStatus().name(), H2Type.VARCHAR);
+            statement.setString(1, entity.getId().toString());
+            statement.setString(2, entity.getName());
+            statement.setString(3, entity.getStatus().name());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to save client: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to save client: ", e);
         }
     }
 
@@ -62,7 +63,7 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
         );
         Map<UUID, Client> clientMap = new LinkedHashMap<>();
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              ResultSet resultSet = connection.createStatement().executeQuery(query)) {
             while (resultSet.next()) {
                 Client dbClient = get(resultSet);
@@ -75,7 +76,7 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 clientMap.put(id, client);
             }
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to retrieve clients: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to retrieve clients: ", e);
         }
 
         return clientMap.values();
@@ -92,21 +93,21 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 WHERE client_id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
              PreparedStatement deleteApartmentStatement = connection.prepareStatement(deleteApartmentQuery)) {
             connection.setAutoCommit(false);
 
-            deleteApartmentStatement.setObject(1, id, H2Type.UUID);
+            deleteApartmentStatement.setString(1, id.toString());
             deleteApartmentStatement.executeUpdate();
 
-            deleteStatement.setObject(1, id, H2Type.UUID);
+            deleteStatement.setString(1, id.toString());
             deleteStatement.executeUpdate();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to delete client and their apartments: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to delete client and their apartments: ", e);
         }
     }
 
@@ -119,15 +120,15 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 """;
         boolean exists = false;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 exists = resultSet.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to check client existence: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to check client existence: ", e);
         }
 
         return exists;
@@ -146,9 +147,9 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 WHERE c.id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             ResultSet resultSet = statement.executeQuery();
             Client client = null;
             while (resultSet.next()) {
@@ -162,7 +163,7 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
             }
             return Optional.ofNullable(client);
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to retrieve client: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to retrieve client: ", e);
         }
     }
 
@@ -178,22 +179,22 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 VALUES (?, ?)
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
              PreparedStatement insertApartmentStatement = connection.prepareStatement(insertApartmentQuery)) {
             connection.setAutoCommit(false);
 
             final UUID entityId = entity.getId();
-            updateStatement.setObject(1, entity.getName(), H2Type.VARCHAR);
-            updateStatement.setObject(2, entity.getStatus().name(), H2Type.VARCHAR);
-            updateStatement.setObject(3, entityId, H2Type.UUID);
+            updateStatement.setString(1, entity.getName());
+            updateStatement.setString(2, entity.getStatus().name());
+            updateStatement.setString(3, entityId.toString());
             updateStatement.executeUpdate();
 
             deleteClientApartments(entityId);
 
             for (ApartmentEntity apartment : entity.getApartments()) {
-                insertApartmentStatement.setObject(1, entityId, H2Type.UUID);
-                insertApartmentStatement.setObject(2, apartment.id(), H2Type.UUID);
+                insertApartmentStatement.setString(1, entityId.toString());
+                insertApartmentStatement.setString(2, apartment.id().toString());
                 insertApartmentStatement.addBatch();
             }
 
@@ -202,7 +203,7 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to update client and their apartments: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to update client and their apartments: ", e);
         }
     }
 
@@ -212,27 +213,28 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                 WHERE client_id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(deleteClientApartmentsQuery)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to delete client and their apartments: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to delete client and their apartments: ", e);
         }
     }
 
     @SneakyThrows
     private Client get(ResultSet resultSet) {
         return new Client(
-                resultSet.getObject("client_id", UUID.class),
+                UUID.fromString(resultSet.getString("client_id")),
                 resultSet.getString("client_name"),
                 ClientStatus.valueOf(resultSet.getString("client_status"))
         );
     }
 
     private void addApartmentCollection(ResultSet resultSet, Client client) throws SQLException {
-        UUID apartmentId = resultSet.getObject("apartment_id", UUID.class);
-        if (apartmentId != null) {
+        final String id = resultSet.getString("apartment_id");
+        if (!StringUtils.isBlank(id)) {
+            UUID apartmentId = UUID.fromString(id);
             BigDecimal price = resultSet.getBigDecimal("price");
             long capacity = resultSet.getLong("capacity");
             boolean availability = resultSet.getBoolean("availability");
@@ -242,5 +244,4 @@ public final class JdbcClientRepository implements SortableCrudRepository<Client
                     .add(new ApartmentEntity(apartmentId, price, BigInteger.valueOf(capacity), availability, apartmentStatus));
         }
     }
-
 }
