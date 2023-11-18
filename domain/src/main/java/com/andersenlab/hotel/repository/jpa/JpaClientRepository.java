@@ -5,6 +5,7 @@ import com.andersenlab.hotel.model.ApartmentEntity;
 import com.andersenlab.hotel.model.Client;
 import com.andersenlab.hotel.model.ClientSort;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
+import com.andersenlab.hotel.usecase.exception.ApartmentNotfoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -83,8 +84,8 @@ public class JpaClientRepository implements SortableCrudRepository<Client, Clien
         transaction.commit();
     }
 
-    class Mapper {
-        private EntityManager manager; //TODO change to ApartmentRepositoryJpa
+    static class Mapper {
+        private final EntityManager manager;
         Mapper(EntityManager manager) {
             this.manager = manager;
         }
@@ -92,15 +93,15 @@ public class JpaClientRepository implements SortableCrudRepository<Client, Clien
             return new ClientJpa(
                     client.getId(), client.getName(), client.getStatus(),
                     client.getApartments().stream()
-                            .map(entity -> getApartment(entity.id())) //TODO Change to ApartmentRepositoryJpa.getById()
+                            .map(entity -> getApartment(entity.id()))
                             .collect(Collectors.toSet())
             );
         }
 
-        private Apartment getApartment(UUID id) { //TODO Change to ApartmentRepositoryJpa.getById()
+        private Apartment getApartment(UUID id) {
             Apartment apartment = manager.find(Apartment.class, id);
             if (apartment == null) {
-                throw new RuntimeException("Apartment not exist in persistence context");
+                throw new ApartmentNotfoundException();
             }
             return apartment;
         }

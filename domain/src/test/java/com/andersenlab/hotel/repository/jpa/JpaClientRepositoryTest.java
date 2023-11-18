@@ -11,7 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JpaClientRepositoryTest {
 
-    private static EntityManagerFactory factory;
+    private EntityManagerFactory factory;
     private EntityManager manager;
     private JpaClientRepository target;
 
@@ -38,17 +38,10 @@ class JpaClientRepositoryTest {
     private Apartment apartment1;
     private Apartment apartment2;
 
-    private ApartmentEntity apartmentEntity1;
-    private ApartmentEntity apartmentEntity2;
-
-    @BeforeAll
-    static void beforeAll() {
-        factory = Persistence.createEntityManagerFactory("test_persistence");
-    }
-
     @BeforeEach
     @SneakyThrows
     void setUp() {
+        factory = Persistence.createEntityManagerFactory("test_persistence");
         manager = factory.createEntityManager();
         target = new JpaClientRepository(factory);
 
@@ -58,15 +51,15 @@ class JpaClientRepositoryTest {
 
     void setUpEntities() {
         apartment1 = new Apartment(UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                BigDecimal.ONE, BigInteger.ONE, false, ApartmentStatus.RESERVED);
+                new BigDecimal("1.00"), BigInteger.ONE, false, ApartmentStatus.RESERVED);
 
         apartment2 = new Apartment(UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                BigDecimal.TWO, BigInteger.TWO, true, ApartmentStatus.AVAILABLE);
+                new BigDecimal("2.00"), BigInteger.TWO, true, ApartmentStatus.AVAILABLE);
 
-        apartmentEntity1 = new ApartmentEntity(apartment1.getId(), apartment1.getPrice(),
+        ApartmentEntity apartmentEntity1 = new ApartmentEntity(apartment1.getId(), apartment1.getPrice(),
                 apartment1.getCapacity(), apartment1.isAvailability(), apartment1.getStatus());
 
-        apartmentEntity2 = new ApartmentEntity(apartment2.getId(), apartment2.getPrice(),
+        ApartmentEntity apartmentEntity2 = new ApartmentEntity(apartment2.getId(), apartment2.getPrice(),
                 apartment2.getCapacity(), apartment2.isAvailability(), apartment2.getStatus());
 
         client1 = new Client(UUID.fromString("00000000-0000-0000-0000-000000000001"),
@@ -76,16 +69,21 @@ class JpaClientRepositoryTest {
                 "name-2", ClientStatus.BANNED);
 
         client3 = new Client(UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                "name-3", ClientStatus.ADVANCED, Set.of(apartmentEntity1));
+                "name-3", ClientStatus.ADVANCED, Set.of(apartmentEntity1, apartmentEntity2));
     }
 
-    void saveApartmentsInContext() { //TODO Change to actual ApartmentRepositoryJpa
+    void saveApartmentsInContext() {
         EntityTransaction transaction = manager.getTransaction();
         transaction.begin();
         manager.persist(apartment1);
         manager.persist(apartment2);
-        manager.flush();
         transaction.commit();
+    }
+
+    @AfterEach
+    void tearDown() {
+        manager.close();
+        factory.close();
     }
 
     @Test

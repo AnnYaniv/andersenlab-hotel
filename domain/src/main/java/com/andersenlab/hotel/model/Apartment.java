@@ -1,8 +1,9 @@
 package com.andersenlab.hotel.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -13,7 +14,6 @@ import java.math.BigInteger;
 import java.util.Objects;
 import java.util.UUID;
 
-//TODO Class must be replaced with actual entity
 @Getter
 @Setter
 @ToString
@@ -22,13 +22,10 @@ import java.util.UUID;
 public final class Apartment {
     @Id
     private UUID id;
-    @Transient
     private BigDecimal price;
-    @Transient
     private BigInteger capacity;
-    @Transient
     private boolean availability;
-    @Transient
+    @Enumerated(EnumType.STRING)
     private ApartmentStatus status;
 
     public Apartment(UUID id, BigDecimal price, BigInteger capacity, boolean availability) {
