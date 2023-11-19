@@ -5,6 +5,7 @@ import com.andersenlab.hotel.model.ClientStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ class ClientJpa {
     private String name;
     @Enumerated(EnumType.STRING)
     private ClientStatus status;
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     private Set<Apartment> apartments;
 
     @Override
