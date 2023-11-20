@@ -24,7 +24,6 @@ public class Main {
         String jdbcPassword = propertyReaderFromFile.readProperty("jdbc.password");
         JdbcConnector jdbc = new JdbcConnector(jdbcUrl, jdbcUser, jdbcPassword)
                 .migrate();
-
         return new ContextBuilder().initJdbc(jdbc)
                 .doRepositoryThreadSafe()
                 .initServices()
