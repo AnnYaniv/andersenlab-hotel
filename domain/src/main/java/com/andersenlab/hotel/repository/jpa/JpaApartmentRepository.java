@@ -13,7 +13,7 @@ import java.util.UUID;
 public class JpaApartmentRepository implements SortableCrudRepository<Apartment, ApartmentSort> {
     EntityManager entityManager;
 
-    JpaApartmentRepository(final EntityManagerFactory entityManagerFactory) {
+    public JpaApartmentRepository(final EntityManagerFactory entityManagerFactory) {
         entityManager = entityManagerFactory.createEntityManager();
     }
 

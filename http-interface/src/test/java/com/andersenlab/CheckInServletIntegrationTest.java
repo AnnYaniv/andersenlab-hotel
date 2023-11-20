@@ -1,7 +1,6 @@
 package com.andersenlab;
 
 import com.andersenlab.hotel.HotelModule;
-import com.andersenlab.hotel.common.reader.PropertyReaderFromFile;
 import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.http.ServletStarter;
 import com.andersenlab.hotel.model.Apartment;
@@ -9,14 +8,12 @@ import com.andersenlab.hotel.model.ApartmentEntity;
 import com.andersenlab.hotel.model.ApartmentStatus;
 import com.andersenlab.hotel.model.Client;
 import com.andersenlab.hotel.model.ClientStatus;
-import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.andersenlab.hotel.service.impl.ClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -31,16 +28,12 @@ import java.net.http.HttpResponse;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CheckInServletIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckInServletIntegrationTest.class);
-
-    private static String user;
-    private static String password;
 
     private ClientService clientService;
     private ApartmentService apartmentService;
@@ -53,24 +46,11 @@ class CheckInServletIntegrationTest {
     private ObjectMapper objectMapper;
 
     ServletStarter starter;
-    AtomicInteger integer = new AtomicInteger(0);
-    JdbcConnector connector;
-
-    @BeforeAll
-    static void beforeAll() {
-        final PropertyReaderFromFile reader = new PropertyReaderFromFile("application.properties");
-        user = reader.readProperty("jdbc.user");
-        password = reader.readProperty("jdbc.password");
-    }
 
     @BeforeEach
     @SneakyThrows
     void setUp() {
-        String db = "ht1-" + integer.incrementAndGet();
-        connector = new JdbcConnector("jdbc:h2:~/" + db, user, password)
-                .migrate();
-
-        HotelModule context = new ContextBuilder().initJdbc(connector)
+        HotelModule context = new ContextBuilder().initJpa("test_persistence")
                 .doRepositoryThreadSafe()
                 .initServices()
                 .initCheckInCheckOut(true)
