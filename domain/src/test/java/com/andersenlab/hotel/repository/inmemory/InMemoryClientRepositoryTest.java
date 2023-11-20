@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -127,12 +128,14 @@ class InMemoryClientRepositoryTest {
         target.save(client4);
         target.save(client5);
 
+        List<Client> expected = Stream.of(client3, client4, client5)
+                .sorted(ClientSort.STATUS.getComparator())
+                .toList();
+
         List<Client> sorted = (List<Client>)
                 target.findAllSorted(ClientSort.STATUS);
 
-        assertThat(sorted.get(0).getStatus()).isEqualTo(ClientStatus.NEW);
-        assertThat(sorted.get(1).getStatus()).isEqualTo(ClientStatus.ADVANCED);
-        assertThat(sorted.get(2).getStatus()).isEqualTo(ClientStatus.BANNED);
+        assertThat(sorted).isEqualTo(expected);
     }
 
     @Test

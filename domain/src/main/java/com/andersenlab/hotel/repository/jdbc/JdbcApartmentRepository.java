@@ -6,10 +6,10 @@ import com.andersenlab.hotel.model.ApartmentStatus;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.EnumUtils;
-import org.h2.api.H2Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,10 +25,10 @@ import java.util.UUID;
 public class JdbcApartmentRepository implements SortableCrudRepository<Apartment, ApartmentSort> {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcApartmentRepository.class);
-    private final JdbcConnector config;
+    private final DataSource source;
 
-    public JdbcApartmentRepository(JdbcConnector config) {
-        this.config = config;
+    public JdbcApartmentRepository(DataSource source) {
+        this.source = source;
     }
 
     @Override
@@ -39,12 +39,12 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 VALUES (?, ?, ?, ?, ?);
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            put(statement, entity);
+            putObjectToResultSet(statement, entity);
             statement.execute();
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Save statement was not executed" + e.getMessage());
+            throw new CouldNotExecuteSql("Save statement was not executed", e);
         }
     }
 
@@ -57,14 +57,14 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 ORDER BY %s;
                 """, sort.name());
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              Statement statement = connection.createStatement()) {
             ResultSet set = statement.executeQuery(query);
             while (set.next()) {
-                apartments.add(get(set));
+                apartments.add(getObjectFromResultSet(set));
             }
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Find all statement was not executed " + e.getMessage());
+            throw new CouldNotExecuteSql("Find all statement was not executed ", e);
         }
         return apartments;
     }
@@ -76,13 +76,13 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 WHERE id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             statement.executeUpdate();
             LOG.info("Query executed. Apartment deleted: {}", id);
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Delete statement was not executed " + e.getMessage());
+            throw new CouldNotExecuteSql("Delete statement was not executed ", e);
         }
     }
 
@@ -94,17 +94,17 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 WHERE id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("quantity") > 0;
             }
+            return false;
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Failed to check client existence: " + e.getMessage());
+            throw new CouldNotExecuteSql("Failed to check client existence: ", e);
         }
-        return false;
     }
 
     @Override
@@ -115,17 +115,17 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 WHERE id = ?
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id, H2Type.UUID);
+            statement.setString(1, id.toString());
             ResultSet set = statement.executeQuery();
             if (set.next()) {
-                return Optional.of(get(set));
+                return Optional.of(getObjectFromResultSet(set));
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Find all statement was not executed " + e.getMessage());
+            throw new CouldNotExecuteSql("Find all statement was not executed ", e);
         }
-        return Optional.empty();
     }
 
     @Override
@@ -136,26 +136,26 @@ public class JdbcApartmentRepository implements SortableCrudRepository<Apartment
                 WHERE id=?;
                 """;
 
-        try (Connection connection = config.getConnection();
+        try (Connection connection = source.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            put(statement, entity);
+            putObjectToResultSet(statement, entity);
             statement.execute();
         } catch (SQLException e) {
-            throw new CouldNotExecuteSql("Update statement was not executed {}" + e.getMessage());
+            throw new CouldNotExecuteSql("Update statement was not executed {}", e);
         }
     }
 
     @SneakyThrows
-    private void put(PreparedStatement statement, Apartment apartment) {
+    private void putObjectToResultSet(PreparedStatement statement, Apartment apartment) {
         statement.setBigDecimal(1, apartment.getPrice());
         statement.setInt(2, apartment.getCapacity().intValue());
         statement.setBoolean(3, apartment.isAvailability());
         statement.setString(4, apartment.getStatus().toString());
-        statement.setObject(5, apartment.getId(), H2Type.UUID);
+        statement.setString(5, apartment.getId().toString());
     }
 
     @SneakyThrows
-    private Apartment get(ResultSet resultSet) {
+    private Apartment getObjectFromResultSet(ResultSet resultSet) {
         return new Apartment(
                 UUID.fromString(resultSet.getString("id")),
                 resultSet.getBigDecimal("price"),

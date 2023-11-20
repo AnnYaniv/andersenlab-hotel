@@ -1,6 +1,5 @@
 package com.andersenlab.hotel.model;
 
-import com.andersenlab.hotel.model.Client;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,7 +10,7 @@ import java.util.Comparator;
 public enum ClientSort {
     ID(Comparator.comparing(Client::getId)),
     NAME(Comparator.comparing(Client::getName)),
-    STATUS(Comparator.comparing(Client::getStatus));
+    STATUS(Comparator.comparing(client -> client.getStatus().name()));
 
     private final Comparator<Client> comparator;
 }

@@ -51,12 +51,6 @@ public class ServletStarter {
     private static void addServlets(HotelModule module, ServletHandler servletHandler) {
         servletHandler.addServletWithMapping(
                 new ServletHolder(
-                        new HelperServlet()
-                ),
-                "/"
-        );
-        servletHandler.addServletWithMapping(
-                new ServletHolder(
                         new AdjustServlet(module.adjustApartmentPriceUseCase())
                 ),
                 "/apartments/adjust"

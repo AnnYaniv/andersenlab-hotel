@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,10 +25,10 @@ class JdbcClientRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        JdbcConnector connector = new JdbcConnector("jdbc:h2:~/ht-" + integer.incrementAndGet(), "sa", "password")
+        JdbcConnector connector = new JdbcConnector("jdbc:h2:~/ht2-" + integer.incrementAndGet(), "sa", "")
                 .migrate();
 
-        target = new JdbcClientRepository(connector);
+        target = new JdbcClientRepository(connector.getDatasourse());
 
         client1 = new Client(UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "a", ClientStatus.NEW);
@@ -54,47 +54,45 @@ class JdbcClientRepositoryTest {
         ClientSort sort = ClientSort.ID;
         target.save(client2);
         target.save(client1);
+        List<Client> expected = List.of(
+                client1,
+                client2
+        );
 
         Collection<Client> actual = target.findAllSorted(sort);
 
-        Map<UUID, Client> expected = Map.of(
-                client1.getId(), client1,
-                client2.getId(), client2
-        );
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected.values());
+        assertThat(actual).containsExactlyElementsOf(expected);
     }
 
     @Test
-    void findAllSorted_EntityPrice_ShouldSortEntitiesFromStoreByPrice() {
+    void findAllSorted_EntityName_ShouldSortEntitiesFromStoreByPrice() {
         ClientSort sort = ClientSort.NAME;
         target.save(client2);
         target.save(client1);
+        List<Client> expected = List.of(
+                client1,
+                client2
+        );
 
         Collection<Client> actual = target.findAllSorted(sort);
 
-        Map<UUID, Client> expected = Map.of(
-                client1.getId(), client1,
-                client2.getId(), client2
-        );
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected.values());
+        assertThat(actual).containsExactlyElementsOf(expected);
     }
 
     @Test
-    void findAllSorted_EntityCapacity_ShouldSortEntitiesFromStoreByCapacity() {
+    void findAllSorted_EntityStatus_ShouldSortEntitiesFromStoreByCapacity() {
         ClientSort sort = ClientSort.STATUS;
         target.save(client1);
+        client2.setStatus(ClientStatus.ADVANCED);
         target.save(client2);
-
-        Collection<Client> actual = target.findAllSorted(sort);
-
-        Map<UUID, Client> expected = Map.of(
-                client1.getId(), client1,
-                client2.getId(), client2
+        List<Client> expected = List.of(
+                client2,
+                client1
         );
 
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected.values());
+        Collection<Client> actual =  target.findAllSorted(sort);
+
+        assertThat(actual).containsExactlyElementsOf(expected);
     }
 
     @Test

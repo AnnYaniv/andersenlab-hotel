@@ -29,10 +29,10 @@ class JdbcApartmentRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        JdbcConnector connector = new JdbcConnector("jdbc:h2:~/ht-" + integer.incrementAndGet(), "sa", "password")
+        JdbcConnector connector = new JdbcConnector("jdbc:h2:~/ht1-" + integer.incrementAndGet(), "sa", "")
                 .migrate();
 
-        target = new JdbcApartmentRepository(connector);
+        target = new JdbcApartmentRepository(connector.getDatasourse());
 
         apartment1 = new Apartment(UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 BigDecimal.valueOf(1.0), BigInteger.ONE, true, ApartmentStatus.AVAILABLE);

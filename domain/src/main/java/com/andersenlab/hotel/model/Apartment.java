@@ -1,6 +1,5 @@
 package com.andersenlab.hotel.model;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,16 +32,12 @@ public final class Apartment {
         this(id, price, capacity, availability, ApartmentStatus.AVAILABLE);
     }
 
-    public Apartment(UUID id, BigDecimal price, BigInteger capacity, boolean availability, ApartmentStatus status) {
-        this.id = id;
-        this.price = price;
-        this.capacity = capacity;
-        this.availability = availability;
-        this.status = status;
+    public Apartment(UUID id) {
+        this(id, BigDecimal.ZERO, BigInteger.ZERO, false, ApartmentStatus.RESERVED);
     }
 
-    public Apartment(BigDecimal price, BigInteger capacity, boolean availability, ApartmentStatus status) {
-        this.id = UUID.randomUUID();
+    public Apartment(UUID id, BigDecimal price, BigInteger capacity, boolean availability, ApartmentStatus status) {
+        this.id = id;
         this.price = price;
         this.capacity = capacity;
         this.availability = availability;
@@ -62,4 +57,3 @@ public final class Apartment {
         return Objects.hash(id, price, capacity, availability, status);
     }
 }
-

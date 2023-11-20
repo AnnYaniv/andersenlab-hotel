@@ -17,7 +17,7 @@ public class AdjustServlet extends JsonServlet {
 
     @Override
     Response put(String uri, Map<String, String> body) {
-        UUID apartmentId = UUID.fromString(body.get("apartmentId"));
+        UUID apartmentId = UUID.fromString(body.get("id"));
         BigDecimal price = new BigDecimal(body.get("price"));
         useCase.adjust(apartmentId, price);
         return new Response(HttpServletResponse.SC_ACCEPTED);
