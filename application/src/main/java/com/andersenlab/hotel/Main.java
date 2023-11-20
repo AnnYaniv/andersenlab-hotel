@@ -3,7 +3,6 @@ package com.andersenlab.hotel;
 import com.andersenlab.hotel.common.reader.PropertyReaderFromFile;
 import com.andersenlab.hotel.common.service.ContextBuilder;
 import com.andersenlab.hotel.http.ServletStarter;
-import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
 
 public class Main {
 
@@ -19,13 +18,9 @@ public class Main {
     public static HotelModule initContext() {
         PropertyReaderFromFile propertyReaderFromFile = new PropertyReaderFromFile("application.properties");
         String abilityApartmentToChange = propertyReaderFromFile.readProperty("apartment.change.enabled");
-        String jdbcUrl = propertyReaderFromFile.readProperty("jdbc.url");
-        String jdbcUser = propertyReaderFromFile.readProperty("jdbc.user");
-        String jdbcPassword = propertyReaderFromFile.readProperty("jdbc.password");
-        JdbcConnector jdbc = new JdbcConnector(jdbcUrl, jdbcUser, jdbcPassword)
-                .migrate();
+        final String persistence = "JPA_persistence";
 
-        return new ContextBuilder().initJdbc(jdbc)
+        return new ContextBuilder().initJpa(persistence)
                 .doRepositoryThreadSafe()
                 .initServices()
                 .initCheckInCheckOut(Boolean.parseBoolean(abilityApartmentToChange))

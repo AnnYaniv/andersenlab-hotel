@@ -15,12 +15,16 @@ import com.andersenlab.hotel.repository.inmemory.InMemoryClientRepository;
 import com.andersenlab.hotel.repository.jdbc.JdbcApartmentRepository;
 import com.andersenlab.hotel.repository.jdbc.JdbcClientRepository;
 import com.andersenlab.hotel.repository.jdbc.JdbcConnector;
+import com.andersenlab.hotel.repository.jpa.JpaApartmentRepository;
+import com.andersenlab.hotel.repository.jpa.JpaClientRepository;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.andersenlab.hotel.service.impl.ClientService;
 import com.andersenlab.hotel.usecase.CheckInClientUseCase;
 import com.andersenlab.hotel.usecase.CheckOutClientUseCase;
 import com.andersenlab.hotel.usecase.impl.BlockedCheckIn;
 import com.andersenlab.hotel.usecase.impl.BlockedCheckOut;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +49,13 @@ public class ContextBuilder {
     public ContextBuilder() {
         this.clientRepository = new InMemoryClientRepository();
         this.apartmentRepository = new InMemoryApartmentRepository();
+    }
+
+    public ContextBuilder initJpa(final String persistenceContext) {
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(persistenceContext);
+        this.clientRepository = new JpaClientRepository(factory);
+        this.apartmentRepository = new JpaApartmentRepository(factory);
+        return this;
     }
 
     @SneakyThrows
