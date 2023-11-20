@@ -5,20 +5,16 @@ import com.andersenlab.hotel.model.ApartmentSort;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
 public class JpaApartmentRepository implements SortableCrudRepository<Apartment, ApartmentSort> {
-    EntityManagerFactory entityManagerFactory;
     EntityManager entityManager;
 
-    JpaApartmentRepository(String JPAUnitName) {
-        entityManagerFactory = Persistence.createEntityManagerFactory(JPAUnitName);
+    JpaApartmentRepository(final EntityManagerFactory entityManagerFactory) {
         entityManager = entityManagerFactory.createEntityManager();
-
     }
 
     @Override
@@ -31,7 +27,7 @@ public class JpaApartmentRepository implements SortableCrudRepository<Apartment,
     @Override
     public Collection<Apartment> findAllSorted(ApartmentSort sort) {
         String sortName = sort.name();
-        return entityManager.createQuery("SELECT a FROM ApartmentEntityJPA a ORDER BY " + sortName.toLowerCase()).getResultList();
+        return entityManager.createQuery("SELECT a FROM Apartment a ORDER BY " + sortName.toLowerCase()).getResultList();
     }
 
     @Override
@@ -44,10 +40,8 @@ public class JpaApartmentRepository implements SortableCrudRepository<Apartment,
 
     @Override
     public boolean has(UUID id) {
-        entityManager.getTransaction().begin();
-        Apartment apartment = entityManager.getReference(Apartment.class, id);
-        entityManager.getTransaction().commit();
-        return ! (apartment.getId().toString().equals(""));
+        Apartment apartment = entityManager.find(Apartment.class, id);
+        return apartment != null;
     }
 
     @Override
@@ -62,12 +56,6 @@ public class JpaApartmentRepository implements SortableCrudRepository<Apartment,
     public void update(Apartment entity) {
         entityManager.getTransaction().begin();
         entityManager.merge(entity);
-        entityManager.getTransaction().commit();
-    }
-
-    public void truncateTable(){
-        entityManager.getTransaction().begin();
-        entityManager.createNativeQuery("TRUNCATE table apartment").executeUpdate();
         entityManager.getTransaction().commit();
     }
 }

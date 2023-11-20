@@ -2,21 +2,26 @@ package com.andersenlab.hotel.model;
 
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
-import lombok.Data;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
 public final class Apartment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private BigDecimal price;
     private BigInteger capacity;
@@ -37,13 +42,24 @@ public final class Apartment {
     }
 
     public Apartment(BigDecimal price, BigInteger capacity, boolean availability, ApartmentStatus status) {
+        this.id = UUID.randomUUID();
         this.price = price;
         this.capacity = capacity;
         this.availability = availability;
         this.status = status;
     }
 
-    public Apartment() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Apartment apartment = (Apartment) o;
+        return availability == apartment.availability && Objects.equals(id, apartment.id) && Objects.equals(price, apartment.price) && Objects.equals(capacity, apartment.capacity) && status == apartment.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, price, capacity, availability, status);
     }
 }
 
