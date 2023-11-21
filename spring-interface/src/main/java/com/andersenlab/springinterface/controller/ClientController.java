@@ -29,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
+
     private final CrudService<Client, ClientEntity> clientService;
     private final ListClientsUseCase listClientsUseCase;
     private final CheckInClientUseCase checkInClientUseCase;
@@ -69,25 +70,28 @@ public class ClientController {
     }
 
     @PutMapping("/check-in")
-    public ClientEntity checkIn(@RequestBody String clientId, @RequestBody String apartmentId) {
+    public ClientEntity checkIn(@RequestBody CheckRequest checkRequest) {
         checkInClientUseCase.checkIn(
-                UUID.fromString(clientId),
-                UUID.fromString(apartmentId)
+                UUID.fromString(checkRequest.clientId),
+                UUID.fromString(checkRequest.apartmentId)
         );
-        return clientService.getById(UUID.fromString(clientId));
+        return clientService.getById(UUID.fromString(checkRequest.clientId));
     }
 
     @PutMapping("/check-out")
-    public ClientEntity checkOut(@RequestBody String clientId, @RequestBody String apartmentId) {
+    public ClientEntity checkOut(@RequestBody CheckRequest checkRequest) {
         checkOutClientUseCase.checkOut(
-                UUID.fromString(clientId),
-                UUID.fromString(apartmentId)
+                UUID.fromString(checkRequest.clientId),
+                UUID.fromString(checkRequest.apartmentId)
         );
-        return clientService.getById(UUID.fromString(clientId));
+        return clientService.getById(UUID.fromString(checkRequest.clientId));
     }
 
     @GetMapping("/stay")
     public BigDecimal calculatePrice(@RequestParam String clientId) {
         return calculateClientStayCurrentPriceUseCase.calculatePrice(UUID.fromString(clientId));
+    }
+
+    record CheckRequest(String clientId, String apartmentId) {
     }
 }
