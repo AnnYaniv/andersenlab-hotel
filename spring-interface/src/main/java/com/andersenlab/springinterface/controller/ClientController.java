@@ -14,10 +14,10 @@ import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,7 +51,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ClientEntity create(@ModelAttribute ClientDto clientDto) {
+    public ClientEntity create(@RequestBody ClientDto clientDto) {
         Client client = clientDto.getClient();
         clientService.save(client);
 
@@ -69,7 +69,7 @@ public class ClientController {
     }
 
     @PutMapping("/check-in")
-    public ClientEntity checkIn(@RequestParam String clientId, @RequestParam String apartmentId) {
+    public ClientEntity checkIn(@RequestBody String clientId, @RequestBody String apartmentId) {
         checkInClientUseCase.checkIn(
                 UUID.fromString(clientId),
                 UUID.fromString(apartmentId)
@@ -78,7 +78,7 @@ public class ClientController {
     }
 
     @PutMapping("/check-out")
-    public ClientEntity checkOut(@RequestParam String clientId, @RequestParam String apartmentId) {
+    public ClientEntity checkOut(@RequestBody String clientId, @RequestBody String apartmentId) {
         checkOutClientUseCase.checkOut(
                 UUID.fromString(clientId),
                 UUID.fromString(apartmentId)
