@@ -1,4 +1,4 @@
-package com.andersenlab.springinterface.ApartmentDto;
+package com.andersenlab.springinterface.dto;
 
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentStatus;

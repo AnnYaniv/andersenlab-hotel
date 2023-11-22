@@ -3,7 +3,7 @@ package com.andersenlab.springinterface.controller;
 
 import com.andersenlab.hotel.model.*;
 import com.andersenlab.hotel.service.impl.ApartmentService;
-import com.andersenlab.springinterface.ApartmentDto.ApartmentDto;
+import com.andersenlab.springinterface.dto.ApartmentDto;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +24,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/apartments")
 public class ApartmentsController {
+    private final ApartmentService apartmentService;
+
     @Autowired
-    ApartmentService apartmentService;
+    public ApartmentsController(ApartmentService apartmentService) {
+        this.apartmentService = apartmentService;
+    }
 
     @GetMapping
     public List<ApartmentEntity> getAll(@RequestParam String sort) {
@@ -49,10 +53,13 @@ public class ApartmentsController {
     public void delete(@PathVariable String id) {
         apartmentService.delete(UUID.fromString(id));
     }
+
     @PutMapping("/adjust")
-    public ApartmentEntity adjust(@RequestBody String clientId, @RequestBody BigDecimal newPrice) {
-        apartmentService.adjust(UUID.fromString(clientId), newPrice);
-        return apartmentService.getById(UUID.fromString(clientId));
+    public ApartmentEntity adjust(@RequestBody AdjustRequest request) {
+        apartmentService.adjust(UUID.fromString(request.clientId), request.newPrice);
+        return apartmentService.getById(UUID.fromString(request.clientId));
     }
 
+    record AdjustRequest(String clientId, BigDecimal newPrice) {
+    }
 }
