@@ -29,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +69,7 @@ class ClientEndToEndTests {
 
     @BeforeEach
     void setUp() {
-        url = "http://localhost:" + port;
+        url = "http://localhost:" + port + "/clients";
 
         client1 = new Client(UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "a-name-1", ClientStatus.NEW);
@@ -104,17 +103,17 @@ class ClientEndToEndTests {
     @Test
     void save_NotExistingClient_ShouldReturnSavedClientEntity() {
         ClientDto clientDto = new ClientDto(client1.getId().toString(), client1.getName(), client1.getStatus().name());
-        ClientEntity actual = restTemplate.postForObject(url + "/clients", clientDto, ClientEntity.class);
+        ClientEntity actual = restTemplate.postForObject(url, clientDto, ClientEntity.class);
 
         assertThat(actual).isEqualTo(entity1);
     }
 
     @Test
-    void save_NotExistingClient_ShouldReturnBadRequest() {
+    void save_ExistingClient_ShouldReturnBadRequest() {
         clientRepository.save(client1);
 
         ClientDto clientDto = new ClientDto(client1.getId().toString(), client1.getName(), client1.getStatus().name());
-        ResponseEntity<ErrorResponse> actual = restTemplate.postForEntity(url + "/clients", clientDto, ErrorResponse.class);
+        ResponseEntity<ErrorResponse> actual = restTemplate.postForEntity(url, clientDto, ErrorResponse.class);
 
         assertThat(actual.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
@@ -123,7 +122,7 @@ class ClientEndToEndTests {
     void delete_ExistingClient_ShouldDeleteEntity() {
         clientRepository.save(client1);
 
-        restTemplate.delete(url + "/clients/" + client1.getId().toString());
+        restTemplate.delete(url + "/{id}", client1.getId().toString());
 
         assertThat(clientRepository.has(client1.getId())).isFalse();
     }
@@ -131,9 +130,8 @@ class ClientEndToEndTests {
     @Test
     @SneakyThrows
     void delete_NotExistingClient_ShouldShouldReturnBadRequest() {
-        RequestEntity<String> request = new RequestEntity<>(HttpMethod.DELETE,
-                new URI(url + "/clients/" + client1.getId().toString()));
-        ResponseEntity<ErrorResponse> response = restTemplate.exchange(request, ErrorResponse.class);
+        ResponseEntity<ErrorResponse> response = restTemplate.exchange(url + "/{id}",  HttpMethod.DELETE,
+                null, ErrorResponse.class, client1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
@@ -144,15 +142,15 @@ class ClientEndToEndTests {
     void getById_ValidClient_ShouldReturnClientEntity() {
         clientRepository.save(client1);
 
-        ClientEntity actual = restTemplate.getForObject(url + "/clients/" + client1.getId().toString(),
-                ClientEntity.class);
+        ClientEntity actual = restTemplate.getForObject(url + "/{id}", ClientEntity.class, client1.getId());
 
         assertThat(actual).isEqualTo(entity1);
     }
 
     @Test
     void getById_NotValidClient_ShouldReturnBadRequest() {
-        ResponseEntity<ErrorResponse> actual = restTemplate.postForEntity(url + "/clients", client1.getId(), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> actual = restTemplate.getForEntity(url + "/{id}", ErrorResponse.class,
+                client1.getId());
 
         assertThat(actual.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
@@ -164,8 +162,8 @@ class ClientEndToEndTests {
         clientRepository.save(client3);
 
         List<ClientEntity> expected = List.of(entity1, entity2, entity3);
-        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "/clients?sort=id",
-                HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "?sort=id", HttpMethod.GET,
+                null, new ParameterizedTypeReference<>() {
                 });
 
         assertThat(actual.getBody()).isEqualTo(expected);
@@ -178,8 +176,8 @@ class ClientEndToEndTests {
         clientRepository.save(client3);
 
         List<ClientEntity> expected = List.of(entity1, entity3, entity2);
-        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "/clients?sort=name",
-                HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "?sort=name", HttpMethod.GET,
+                null, new ParameterizedTypeReference<>() {
                 });
 
         assertThat(actual.getBody()).isEqualTo(expected);
@@ -192,8 +190,8 @@ class ClientEndToEndTests {
         clientRepository.save(client3);
 
         List<ClientEntity> expected = List.of(entity3, entity2, entity1);
-        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "/clients?sort=status",
-                HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<List<ClientEntity>> actual = restTemplate.exchange(url + "?sort=status", HttpMethod.GET,
+                null, new ParameterizedTypeReference<>() {
                 });
 
         assertThat(actual.getBody()).isEqualTo(expected);
@@ -209,17 +207,16 @@ class ClientEndToEndTests {
         clientService.checkIn(client1.getId(), apartment2.getId());
 
         BigDecimal expected = apartment1.getPrice().add(apartment2.getPrice());
-        BigDecimal actual = restTemplate.getForObject(url + "/clients/stay?clientId=" + client1.getId().toString(), BigDecimal.class);
+        BigDecimal actual = restTemplate.getForObject(url + "/stay?clientId={id}", BigDecimal.class,
+                client1.getId());
 
         assertThat(actual).isEqualByComparingTo(expected);
     }
 
     @Test
     void calculatePrice_NotExistingEntity_ShouldReturnBadRequest() {
-        ResponseEntity<ErrorResponse> actual = restTemplate.getForEntity(
-                String.format("%s/clients/stay?clientId=%s", url, client1.getId().toString()),
-                ErrorResponse.class
-        );
+        ResponseEntity<ErrorResponse> actual = restTemplate.getForEntity(url + "/stay?clientId={id}",
+                ErrorResponse.class, client1.getId().toString());
 
         assertThat(actual.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
     }
