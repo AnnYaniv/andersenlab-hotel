@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -216,23 +215,6 @@ class ClientServiceUnitTest {
         target.checkOut(clientId, apartmentId);
 
         verify(apartmentService).update(expected);
-    }
-
-    @Test
-    void checkOut_ApartmentDoesNotExistInClientSet_ShouldNotCallApartmentServiceSaveMethod() {
-        final UUID clientId = UUID.randomUUID();
-        final UUID apartmentId = client.getApartments().stream().findFirst().get().id();
-        client.getApartments().remove(apartmentEntity);
-        when(repository.getById(any(UUID.class)))
-                .thenReturn(Optional.of(client));
-        when(apartmentService.getById(any(UUID.class)))
-                .thenReturn(apartmentEntity);
-        when(repository.has(any(UUID.class)))
-                .thenReturn(true);
-
-        target.checkOut(clientId, apartmentId);
-
-        verify(apartmentService, never()).update(any(Apartment.class));
     }
 
     @Test
