@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,8 +61,9 @@ class ApartmentEndToEndTests {
 
     @AfterEach
     void teardown() {
-        apartmentRepository.delete(apartment1.getId());
-        apartmentRepository.delete(apartment2.getId());
+        Stream.of(apartment1, apartment2)
+                .filter(apartment -> apartmentRepository.has(apartment.getId()))
+                .forEach(apartment -> apartmentRepository.delete(apartment.getId()));
     }
 
     @Test

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class ClientService implements CalculateClientStayCurrentPriceUseCase,
@@ -82,7 +83,11 @@ public final class ClientService implements CalculateClientStayCurrentPriceUseCa
         ClientEntity client = getById(clientId);
         ApartmentEntity apartment = apartmentService.getById(apartmentId);
 
-        boolean ifClientHasApartment = client.apartments().remove(apartment);
+        Optional<ApartmentEntity> apartmentEntity = client.apartments().stream()
+                .filter(a -> a.id().equals(apartmentId)).findFirst();
+        apartmentEntity.ifPresent(a -> client.apartments().remove(a));
+
+        boolean ifClientHasApartment = apartmentEntity.isPresent();
         if (ifClientHasApartment) {
             apartmentService.update(
                     new Apartment(apartment.id(), apartment.price(), apartment.capacity(), true,
