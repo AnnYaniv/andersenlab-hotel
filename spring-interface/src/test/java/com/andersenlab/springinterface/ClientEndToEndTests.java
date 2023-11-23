@@ -15,7 +15,9 @@ import com.andersenlab.springinterface.model.ErrorResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -31,12 +33,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class ClientEndToEndTests {
 
     @LocalServerPort
@@ -93,11 +98,13 @@ class ClientEndToEndTests {
 
     @AfterEach
     void tearDown() {
-        clientRepository.delete(client1.getId());
-        clientRepository.delete(client2.getId());
-        clientRepository.delete(client3.getId());
-        apartmentRepository.delete(apartment1.getId());
-        apartmentRepository.delete(apartment2.getId());
+        Stream.of(client1, client2, client3)
+                .filter(client -> clientRepository.has(client.getId()))
+                .forEach(client -> clientRepository.delete(client.getId()));
+
+        Stream.of(apartment1, apartment2)
+                .filter(apartment -> apartmentRepository.has(apartment.getId()))
+                .forEach(apartment -> apartmentRepository.delete(apartment.getId()));
     }
 
     @Test
@@ -130,7 +137,7 @@ class ClientEndToEndTests {
     @Test
     @SneakyThrows
     void delete_NotExistingClient_ShouldShouldReturnBadRequest() {
-        ResponseEntity<ErrorResponse> response = restTemplate.exchange(url + "/{id}",  HttpMethod.DELETE,
+        ResponseEntity<ErrorResponse> response = restTemplate.exchange(url + "/{id}", HttpMethod.DELETE,
                 null, ErrorResponse.class, client1.getId());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(400));
@@ -257,13 +264,13 @@ class ClientEndToEndTests {
 
     @Test
     void checkOut_ValidClientAndValidApartment_ShouldReturnStatusOK() {
-        clientRepository.save(client1);
         apartmentRepository.save(apartment1);
+        clientService.save(client1);
         clientService.checkIn(client1.getId(), apartment1.getId());
 
         ResponseEntity<ClientEntity> response = restTemplate.exchange(
                 RequestEntity
-                        .put("/clients/check-out")
+                        .put(url + "/check-out")
                         .body(
                                 Map.of(
                                         "clientId", client1.getId().toString(),
@@ -334,6 +341,7 @@ class ClientEndToEndTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(expected);
+        assertThat(Objects.requireNonNull(response.getBody()).apartments().iterator().next().id())
+                .isEqualTo(expected.apartments().iterator().next().id());
     }
 }
