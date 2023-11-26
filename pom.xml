@@ -15,6 +15,9 @@
         <module>application</module>
         <module>command-line-interface</module>
         <module>common</module>
+        <module>jpa-spring-boot-starter</module>
+        <module>inmemory-spring-boot-starter</module>
+        <module>spring-interface</module>
     </modules>
 
     <properties>
