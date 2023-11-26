@@ -9,11 +9,14 @@ import com.andersenlab.hotel.repository.jpa.JpaApartmentRepository;
 import com.andersenlab.hotel.repository.jpa.JpaClientRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+
+import java.util.Map;
 
 @AutoConfiguration
 public class JpaAutoConfiguration {
@@ -33,7 +36,14 @@ public class JpaAutoConfiguration {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public EntityManagerFactory entityManagerFactory() {
-        return Persistence.createEntityManagerFactory("updatable");
+    public EntityManagerFactory entityManagerFactory(@Value("${persistence.jdbc.url}") String url) {
+        if (url.isBlank()) {
+            return Persistence.createEntityManagerFactory("postgres");
+        } else {
+            return Persistence.createEntityManagerFactory("postgres",
+                    Map.of(
+                            "jakarta.persistence.jdbc.url", url
+            ));
+        }
     }
 }

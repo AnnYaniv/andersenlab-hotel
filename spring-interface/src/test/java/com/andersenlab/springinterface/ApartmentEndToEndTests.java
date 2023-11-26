@@ -20,6 +20,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -32,6 +36,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApartmentEndToEndTests {
+    @Container
+    public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1")
+            .withDatabaseName("hotel-jpa")
+            .withUsername("postgres")
+            .withPassword("root");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("persistence.jdbc.url", postgreSQLContainer::getJdbcUrl);
+    }
+
     @LocalServerPort
     private int port;
 
@@ -45,6 +60,16 @@ class ApartmentEndToEndTests {
     Apartment apartment2;
     ApartmentEntity apartmentEntity1;
     ApartmentEntity apartmentEntity2;
+
+    @BeforeAll
+    static void beforeAll() {
+        postgreSQLContainer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        postgreSQLContainer.stop();
+    }
 
     @BeforeEach
     void setUp() {
