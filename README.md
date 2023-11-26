@@ -2,32 +2,42 @@
 
 This is a project for Java intensive course.
 
-# Application Commands
+# How to run
 
-This application provides various commands to manage clients and apartments. Below is a list of available commands along with their syntax and descriptions:
+Application using Docker, so you can launch program with next commands:
 
-## Client Commands
+```
+docker build -t hotel .
+docker run -p 8080:8080 hotel
+```
+
+# Application Endpoints
+
+This application provides various endpoints to manage clients and apartments. Below is a list of them and descriptions:
+
+## Client Endpoints
 
 ### Create Client
 
 ```
-create client
+[POST] /clients
+```
+Request body **must** include:
+```
+{
+    "id":"",
+    "name":"",
+    "status":""
+}
 ```
 
-Creates a *new client* with the **automatically generated** UUID and name.
+Creates a *new client* with the **specified** data.
 
-### Create Specified Client
-
-```
-create client UUID name
-```
-
-Creates a *new client* with the **specified** UUID and name.
 
 ### Delete Client
 
 ```
-delete client UUID
+[DELETE] /clients/{id}
 ```
 
 *Deletes* the client with the **specified** UUID.
@@ -35,7 +45,7 @@ delete client UUID
 ### Get Client
 
 ```
-get client UUID
+[GET] /clients/{id}
 ```
 
 Retrieves and displays the *details of the client* with the **specified** UUID.
@@ -43,7 +53,7 @@ Retrieves and displays the *details of the client* with the **specified** UUID.
 ### Get All Clients
 
 ```
-get_all client sort
+[GET] /clients?sort={sort}
 ```
 
 ***'sort'*** param have to contain [ ID NAME STATUS ]
@@ -53,49 +63,63 @@ Retrieves and displays *list of all clients* with **specified** sort param.
 ### Check-in Client
 
 ```
-check_in clientUUID apartmentUUID
+[PUT] /clients/check-in
 ```
-
+Request body **must** include:
+```
+{
+    "clientId":"",
+    "apartmentId":""
+}
+```
 Associates the client with the specified UUID with the apartment with the specified UUID.
 
 ### Check-out Client
 
 ```
-check_out clientUUID apartmentUUID
+[PUT] /clients/check-out
 ```
-
+Request body **must** include:
+```
+{
+    "clientId":"",
+    "apartmentId":""
+}
+```
 Disassociates the client with the specified UUID from the apartment with the specified UUID.
 
 ### Calculate Client Stay Price
 
 ```
-calculate_price clientUUID
+[GET] /clients/stay?clientId={id}
 ```
 
 Calculates and displays the price for the stay of the client with the specified UUID.
 
-## Apartment Commands
+## Apartment Endpoints
 
 ### Create Apartment
 
 ```
-create apartment
+[POST] /apartments
 ```
 
-Creates a *new apartment* with the **automatically** generated UUID, price, capacity, availability, and apartment status.
-
-### Create Specified Apartment
-
+Request body **must** include:
 ```
-create apartment [UUID price capacity availability apartment_status]
+{
+    "id":"",
+    "price":"",
+    "capacity":"",
+    "availability":"",
+    "status":""
+}
 ```
-
 Creates a *new apartment* with the **specified** UUID, price, capacity, availability, and apartment status.
 
 ### Delete Apartment
 
 ```
-delete apartment UUID
+[DELETE] /apartments/{id}
 ```
 
 *Deletes* the apartment with the **specified** UUID.
@@ -103,7 +127,7 @@ delete apartment UUID
 ### Get Apartment
 
 ```
-get apartment UUID
+[GET] /apartments/{id}
 ```
 
 Retrieves and displays the *details of the apartment* with the **specified** UUID.
@@ -111,7 +135,7 @@ Retrieves and displays the *details of the apartment* with the **specified** UUI
 ### Get All Apartments
 
 ```
-get_all apartment sort
+[GET] /apartments/sort={sort}
 ```
 
 ***'sort'*** param have to contain [ ID CAPACITY AVAILABILITY PRICE ]
@@ -121,15 +145,17 @@ Retrieves and displays *list of all apartments* with **specified** sort param.
 ### Adjust Apartment Price
 
 ```
-adjust apartmentUUID price
+[PUT] /apartments/adjust
+```
+
+Request body **must** include:
+```
+{
+    "clientId":"",
+    "newPrice":""
+}
 ```
 
 *Adjusts the price* of the apartment with the **specified** UUID to the specified price.
 
-## Exit
 
-```
-exit
-```
-
-*Exits the application.*
