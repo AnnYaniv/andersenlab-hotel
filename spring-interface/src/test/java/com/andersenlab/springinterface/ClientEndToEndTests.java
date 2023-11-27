@@ -13,7 +13,9 @@ import com.andersenlab.hotel.service.impl.ClientService;
 import com.andersenlab.springinterface.dto.ClientDto;
 import com.andersenlab.springinterface.model.ErrorResponse;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -43,6 +49,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class ClientEndToEndTests {
+    @Container
+    public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1")
+            .withDatabaseName("hotel-jpa")
+            .withUsername("postgres")
+            .withPassword("root");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("persistence.jdbc.url", postgreSQLContainer::getJdbcUrl);
+    }
+
 
     @LocalServerPort
     private int port;
@@ -71,6 +88,16 @@ class ClientEndToEndTests {
 
     private Apartment apartment1;
     private Apartment apartment2;
+
+    @BeforeAll
+    static void beforeAll() {
+        postgreSQLContainer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        postgreSQLContainer.stop();
+    }
 
     @BeforeEach
     void setUp() {
