@@ -23,7 +23,7 @@ public class JpaAutoConfiguration {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Primary
-    public SortableCrudRepository<Apartment, ApartmentSort> apartmentRepository(EntityManagerFactory entityManagerFactory){
+    public SortableCrudRepository<Apartment, ApartmentSort> apartmentRepository(EntityManagerFactory entityManagerFactory) {
         return new JpaApartmentRepository(entityManagerFactory);
     }
 
@@ -37,13 +37,9 @@ public class JpaAutoConfiguration {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public EntityManagerFactory entityManagerFactory(@Value("${persistence.jdbc.url}") String url) {
-        if (url.isBlank()) {
-            return Persistence.createEntityManagerFactory("postgres");
-        } else {
-            return Persistence.createEntityManagerFactory("postgres",
-                    Map.of(
-                            "jakarta.persistence.jdbc.url", url
-            ));
-        }
+        return Persistence.createEntityManagerFactory("postgres",
+                Map.of(
+                        "jakarta.persistence.jdbc.url", url
+                ));
     }
 }
