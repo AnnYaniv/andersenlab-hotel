@@ -15,4 +15,4 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=car_service
+      - POSTGRES_DB=hotel-jpa
