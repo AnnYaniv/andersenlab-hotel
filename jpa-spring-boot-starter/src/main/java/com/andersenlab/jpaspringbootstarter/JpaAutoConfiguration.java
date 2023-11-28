@@ -9,18 +9,21 @@ import com.andersenlab.hotel.repository.jpa.JpaApartmentRepository;
 import com.andersenlab.hotel.repository.jpa.JpaClientRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
+import java.util.Map;
+
 @AutoConfiguration
 public class JpaAutoConfiguration {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Primary
-    public SortableCrudRepository<Apartment, ApartmentSort> apartmentRepository(EntityManagerFactory entityManagerFactory){
+    public SortableCrudRepository<Apartment, ApartmentSort> apartmentRepository(EntityManagerFactory entityManagerFactory) {
         return new JpaApartmentRepository(entityManagerFactory);
     }
 
@@ -33,7 +36,10 @@ public class JpaAutoConfiguration {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public EntityManagerFactory entityManagerFactory() {
-        return Persistence.createEntityManagerFactory("updatable");
+    public EntityManagerFactory entityManagerFactory(@Value("${persistence.jdbc.url}") String url) {
+        return Persistence.createEntityManagerFactory("postgres",
+                Map.of(
+                        "jakarta.persistence.jdbc.url", url
+                ));
     }
 }
