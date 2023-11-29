@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotel-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hotel-service
+  template:
+    metadata:
+      labels:
+        app: hotel-service
+    spec:
+      containers:
+        - name: hotel-service
+          image: annayaniv/andersenlab-hotel:2023-11-28
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: hotel-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotel-service
+spec:
+  selector:
+    app: hotel
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
