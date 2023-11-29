@@ -7,8 +7,7 @@ This is a project for Java intensive course.
 Application using Docker, so you can launch program with next commands:
 
 ```
-docker build -t hotel .
-docker run -p 8080:8080 hotel
+minikube start; kubectl apply -f kubernetes
 ```
 
 # Application Endpoints
