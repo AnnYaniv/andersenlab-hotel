@@ -27,7 +27,7 @@ metadata:
   name: hotel-service
 spec:
   selector:
-    app: hotel
+    app: hotel-service
   ports:
     - port: 8080
       name: http

@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: postgres
-  replicas: 2
+  replicas: 3
   template:
     metadata:
       labels:
@@ -41,6 +41,14 @@ spec:
       volumes:
         - name: database
           emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: database
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 100Mi
 ---
 apiVersion: v1
 kind: Service
