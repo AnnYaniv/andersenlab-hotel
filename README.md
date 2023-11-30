@@ -4,11 +4,24 @@ This is a project for Java intensive course.
 
 # How to run
 
-Application using Docker, so you can launch program with next commands:
+Application using minikube, so you can launch program with next commands:
 
 ```
-docker build -t hotel .
-docker run -p 8080:8080 hotel
+minikube start --addons ingress; kubectl apply -f kubernetes
+```
+
+# Example request:
+
+Get all apartments:
+
+```
+curl --resolve "hotel-service.com:80:127.0.0.1" http://hotel-service.com/apartments?sort=id
+```
+
+Add an apartment:
+
+```
+curl --resolve "hotel-service.com:80:127.0.0.1" -X POST  http://hotel-service.com/apartments -H "Content-Type:application/json" -d '{"id":"00000000-0000-0000-0000-000000000003","price":3,"capacity":1,"availability":true,"status":"AVAILABLE"}'
 ```
 
 # Application Endpoints
