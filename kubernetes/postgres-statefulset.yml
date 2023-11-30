@@ -49,14 +49,3 @@ spec:
         resources:
           requests:
             storage: 100Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres-service
-spec:
-  selector:
-    app: postgres
-  ports:
-    - port: 5432
-      targetPort: 5432
