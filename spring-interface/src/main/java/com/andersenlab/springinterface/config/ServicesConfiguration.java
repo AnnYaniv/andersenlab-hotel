@@ -5,12 +5,14 @@ import com.andersenlab.hotel.model.ApartmentSort;
 import com.andersenlab.hotel.model.Client;
 import com.andersenlab.hotel.model.ClientSort;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
+import com.andersenlab.hotel.service.MessageBroker;
 import com.andersenlab.hotel.service.impl.ApartmentService;
 import com.andersenlab.hotel.service.impl.ClientService;
 import com.andersenlab.hotel.usecase.CheckInClientUseCase;
 import com.andersenlab.hotel.usecase.CheckOutClientUseCase;
 import com.andersenlab.hotel.usecase.impl.BlockedCheckIn;
 import com.andersenlab.hotel.usecase.impl.BlockedCheckOut;
+import com.andersenlab.hotel.usecase.impl.PublishCheckIn;
 import com.andersenlab.springinterface.model.ClientCases;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -35,7 +37,8 @@ public class ServicesConfiguration {
 
     @Bean
     public ClientCases clientCases(ClientService clientService,
-                                   @Value("${apartment.change.enabled}") boolean apartmentChangeEnabled) {
+                                   @Value("${apartment.change.enabled}") boolean apartmentChangeEnabled,
+                                   MessageBroker messageBroker) {
         CheckInClientUseCase checkInClientUseCase;
         CheckOutClientUseCase checkOutClientUseCase;
 
@@ -47,6 +50,9 @@ public class ServicesConfiguration {
             checkOutClientUseCase = new BlockedCheckOut();
         }
 
+        checkInClientUseCase = new PublishCheckIn(checkInClientUseCase, messageBroker);
+
         return new ClientCases(clientService, clientService, checkInClientUseCase, checkOutClientUseCase, clientService);
     }
+
 }

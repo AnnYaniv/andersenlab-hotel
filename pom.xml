@@ -18,6 +18,7 @@
         <module>jpa-spring-boot-starter</module>
         <module>inmemory-spring-boot-starter</module>
         <module>spring-interface</module>
+        <module>kafka-spring-boot-starter</module>
     </modules>
 
     <properties>
