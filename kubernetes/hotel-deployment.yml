@@ -18,6 +18,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: hotel-service
+            - configMapRef:
+                name: kafka-customer-cm
           ports:
             - containerPort: 8080
               name: http
