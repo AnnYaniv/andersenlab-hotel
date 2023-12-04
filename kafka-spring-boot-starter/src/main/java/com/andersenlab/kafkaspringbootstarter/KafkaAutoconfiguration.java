@@ -16,7 +16,7 @@ public class KafkaAutoconfiguration {
         return new KafkaMessageBroker(
                 new KafkaTemplate<>(
                         new DefaultKafkaProducerFactory<>(
-                                kafkaProperties.buildProducerProperties() //TODO it is deprecated!
+                                kafkaProperties.buildProducerProperties()
                         )
                 ),
                 topic
