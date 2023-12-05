@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-customer-cm
+data:
+  APACHEKAFKACONSUMER_KAFKA_TOPIC: "publish"
+  SPRING_KAFKA_BOOTSTRAPSERVERS: apache-kafka-0.apache-kafka.default.svc.cluster.local:9092
+  HOTEL_KAFKA_TOPIC: "publish"

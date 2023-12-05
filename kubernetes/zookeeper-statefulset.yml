@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper-stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper-service
+  serviceName: zookeeper-service
+  template:
+    metadata:
+      labels:
+        app: zookeeper-service
+    spec:
+      containers:
+        - name: zookeeper-service
+          image: confluentinc/cp-zookeeper:7.4.3
+          envFrom:
+            - configMapRef:
+                name: zookeeper-cm
+          ports:
+            - containerPort: 2181
+              name: http
+          readinessProbe:
+            exec:
+              command: [ "nc", "-z", "localhost", "2181" ]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/zookeeper/data
+            - name: log
+              mountPath: /var/lib/zookeeper/log
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 100Mi
+    - metadata:
+        name: log
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 100Mi
