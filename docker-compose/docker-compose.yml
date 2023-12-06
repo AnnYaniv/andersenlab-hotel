@@ -8,10 +8,12 @@ services:
       - POSTGRES_DB=hotel-jpa
     ports:
       - "5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
   kafka-consumer:
     image: annayaniv/kafka-consumer:1.0
     build:
-      context: ./
+      context: ..
       args:
         module: kafka-consumer
     container_name: kafka-consumer
@@ -23,7 +25,7 @@ services:
   hotel:
     image: "andersenlab-hotel:latest"
     build:
-      context: ./
+      context: ..
       args:
         module: hotel
     container_name: hotel
@@ -33,10 +35,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       HOTEL_KAFKA_TOPIC: publish
       SPRING_KAFKA_BOOTSTRAPSERVERS: apache-kafka:9092
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: http://keycloak:8080/realms/hotel
     depends_on:
       - postgresql
     ports:
-      - "8080:8080"
+      - "8081:8080"
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.3
     container_name: zookeeper
@@ -63,3 +66,21 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092"
+  keycloak:
+    image: keycloak/keycloak:21.1
+    container_name: keycloak
+    depends_on:
+      - postgresql
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgresql:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: root
+      KC_HEALTH_ENABLED: "true"
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./realm.json:/opt/keycloak/data/import/realm.json
