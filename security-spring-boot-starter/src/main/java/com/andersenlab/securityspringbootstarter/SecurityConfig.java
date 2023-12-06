@@ -36,7 +36,6 @@ class SecurityConfig {
                                 .requestMatchers(antMatcher(HttpMethod.GET, "/apartments/**")).access(hasAuthority(APARTMENTS_READ.getAuthority()))
                                 .requestMatchers(antMatcher(HttpMethod.DELETE, "/apartments/**")).access(hasAuthority(APARTMENTS_DELETE.getAuthority()))
                                 .requestMatchers(antMatcher(HttpMethod.PUT, "/apartments/adjust")).access(hasAuthority(APARTMENTS_ADJUST.getAuthority()))
-                                .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
                         oauth2

@@ -59,6 +59,42 @@
       "realmRoles": [
         "OWNER"
       ]
+    },
+    {
+      "username": "anastasia",
+      "enabled": true,
+      "firstName": "Anastasia",
+      "lastName": "Synitsa",
+      "email": "synitsa@gmail.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "pass",
+          "temporary": "false"
+        }
+      ],
+      "realmRoles": [
+        "RECEPTIONIST"
+      ]
+    },
+    {
+      "username": "alex",
+      "enabled": true,
+      "firstName": "Alex",
+      "lastName": "Synitsa",
+      "email": "a_synitsa@gmail.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "pass",
+          "temporary": "false"
+        }
+      ],
+      "realmRoles": [
+        "ADMINISTRATOR"
+      ]
     }
   ]
 }
