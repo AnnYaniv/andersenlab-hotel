@@ -32,18 +32,18 @@ spec:
                 secretKeyRef:
                   name: secret
                   key: p-user
-          envFrom:
-            - configMapRef:
-                name: postgres
           volumeMounts:
-            - name: database
+            - name: data
               mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
-        - name: database
-          emptyDir: {}
+        - name: init
+          configMap:
+            name: postgres
   volumeClaimTemplates:
     - metadata:
-        name: database
+        name: data
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
