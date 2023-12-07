@@ -1,0 +1,100 @@
+{
+  "id": "hotel",
+  "realm": "hotel",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "OWNER",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "hotel",
+        "attributes": {}
+      },
+      {
+        "name": "ADMINISTRATOR",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "hotel",
+        "attributes": {}
+      },
+      {
+        "name": "RECEPTIONIST",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "hotel",
+        "attributes": {}
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "public",
+      "enabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "https://oidcdebugger.com/debug"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "anna",
+      "enabled": true,
+      "firstName": "Anna",
+      "lastName": "Yaniv",
+      "email": "anna.yaniv@gmail.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "anna",
+          "temporary": "false"
+        }
+      ],
+      "realmRoles": [
+        "OWNER"
+      ]
+    },
+    {
+      "username": "anastasia",
+      "enabled": true,
+      "firstName": "Anastasia",
+      "lastName": "Synitsa",
+      "email": "synitsa@gmail.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "pass",
+          "temporary": "false"
+        }
+      ],
+      "realmRoles": [
+        "RECEPTIONIST"
+      ]
+    },
+    {
+      "username": "alex",
+      "enabled": true,
+      "firstName": "Alex",
+      "lastName": "Synitsa",
+      "email": "a_synitsa@gmail.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "pass",
+          "temporary": "false"
+        }
+      ],
+      "realmRoles": [
+        "ADMINISTRATOR"
+      ]
+    }
+  ]
+}

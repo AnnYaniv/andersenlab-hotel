@@ -3,4 +3,6 @@ kind: ConfigMap
 metadata:
   name: postgres
 data:
-  POSTGRES_DB: hotel-jpa
+  init.sql: |
+    CREATE DATABASE "hotel-jpa";
+    CREATE DATABASE "keycloak";

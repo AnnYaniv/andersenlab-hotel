@@ -3,4 +3,6 @@ kind: ConfigMap
 metadata:
   name: hotel-service
 data:
-  PERSISTENCE_JDBC_URL: jdbc:postgresql://postgres-stateful-0.postgres-service.default.svc.cluster.local:5432/hotel-jpa
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: "http://keycloak/realms/hotel"
+  PERSISTENCE_JDBC_URL: "jdbc:postgresql://postgres-stateful-0.postgres-service.default.svc.cluster.local:5432/hotel-jpa"
+  SERVER_PORT: "8080"

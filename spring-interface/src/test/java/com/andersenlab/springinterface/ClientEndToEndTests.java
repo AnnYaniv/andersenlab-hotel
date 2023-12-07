@@ -2,7 +2,7 @@ package com.andersenlab.springinterface;
 
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentEntity;
-import com.andersenlab.hotel.model.ApartmentSort;
+import com.andersenlab.hotel.model.*;
 import com.andersenlab.hotel.model.ApartmentStatus;
 import com.andersenlab.hotel.model.Client;
 import com.andersenlab.hotel.model.ClientEntity;
@@ -49,10 +49,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@ActiveProfiles("test")
+@ActiveProfiles(value = {"test-without-security", "test"})
 class ClientEndToEndTests {
     @Container
-    public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1")
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:11.1")
             .withDatabaseName("hotel-jpa")
             .withUsername("postgres")
             .withPassword("root");
