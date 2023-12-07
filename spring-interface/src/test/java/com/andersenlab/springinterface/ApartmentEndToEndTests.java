@@ -3,7 +3,7 @@ package com.andersenlab.springinterface;
 
 import com.andersenlab.hotel.model.Apartment;
 import com.andersenlab.hotel.model.ApartmentEntity;
-import com.andersenlab.hotel.model.ApartmentSort;
+import com.andersenlab.hotel.model.*;
 import com.andersenlab.hotel.model.ApartmentStatus;
 import com.andersenlab.hotel.repository.SortableCrudRepository;
 
@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,9 +36,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles(value = {"test-without-security", "test"})
 class ApartmentEndToEndTests {
     @Container
-    public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1")
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:11.1")
             .withDatabaseName("hotel-jpa")
             .withUsername("postgres")
             .withPassword("root");

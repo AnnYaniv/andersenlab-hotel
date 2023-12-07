@@ -2,10 +2,12 @@ package com.andersenlab.securityspringbootstarter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static com.andersenlab.securityspringbootstarter.Authority.*;
@@ -18,12 +20,14 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableWebSecurity
 class SecurityConfig {
     @Bean
+    @Profile("!test-without-security")
     SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers(antMatcher(HttpMethod.GET,"/actuator/**")).permitAll()
-                                .requestMatchers(antMatcher(HttpMethod.GET,"/error")).permitAll()
+                                .requestMatchers(antMatcher(HttpMethod.GET, "/actuator/**")).permitAll()
+                                .requestMatchers(antMatcher(HttpMethod.GET, "/error")).permitAll()
                                 .requestMatchers(antMatcher(HttpMethod.GET, "/clients")).access(hasAuthority(CLIENTS_READ.getAuthority()))
                                 .requestMatchers(antMatcher(HttpMethod.POST, "/clients")).access(hasAuthority(CLIENTS_CREATE.getAuthority()))
                                 .requestMatchers(antMatcher(HttpMethod.GET, "/clients/**")).access(hasAuthority(CLIENTS_READ.getAuthority()))
@@ -42,6 +46,16 @@ class SecurityConfig {
                                 .jwt(jwtConfigurer ->
                                         jwtConfigurer
                                                 .jwtAuthenticationConverter(new HotelJwtAuthenticationConverter()))
+                )
+                .build();
+    }
+
+    @Bean
+    @Profile("test-without-security")
+    SecurityFilterChain securityFilterChainTest(HttpSecurity security) throws Exception {
+        return security.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize ->
+                        authorize.anyRequest().permitAll()
                 )
                 .build();
     }
